@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text-to-Speech</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #cca7a9, #b68375);
+            color: rgb(50, 50, 50);
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h2 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            animation: slideDown 0.8s ease-in-out;
+        }
+
+        textarea {
+            width: 90%;
+            height: 100px;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: rgb(94, 90, 90);
+            outline: none;
+            resize: none;
+            transition: 0.3s ease-in-out;
+        }
+
+        textarea:focus {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        select, button {
+            width: 100%;
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border: none;
+        }
+
+        select {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgb(50, 50, 50);
+            outline: none;
+        }
+
+        button {
+            background: #ff4b5c;
+            color: white;
+            box-shadow: 0 4px 10px rgba(255, 75, 92, 0.5);
+        }
+
+        button:hover {
+            background: #ff2e4d;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        #downloadLink {
+            display: none;
+            text-decoration: none;
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: inline-block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🎙️ Text-to-Speech Converter</h2>
+        <textarea id="textInput" placeholder="Enter text..."></textarea>
+        <br>
+        <label for="voiceSelect">Choose Voice:</label>
+        <select id="voiceSelect">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select>
+        <br>
+        <button onclick="convertTextToSpeech()">🎧 Convert to Speech</button>
+        <br>
+        <a id="downloadLink" href="#" download="static/audio/output.mp3">⬇ Download Audio</a>
+    </div>
+
+    <script>
+        function convertTextToSpeech() {
+            const text = document.getElementById("textInput").value.trim();
+            const voice = document.getElementById("voiceSelect").value;
+            const downloadLink = document.getElementById("downloadLink");
+
+            if (!text) {
+                alert("⚠️ Please enter text!");
+                return;
+            }
+
+            fetch("/text-to-speech", {
+                method: "POST",
+                body: new URLSearchParams({ "text": text, "voice": voice }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.download_url) {
+                    downloadLink.href = data.download_url;
+                    downloadLink.style.display = "inline-block";
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("❌ Error converting text!");
+            });
+        }
+    </script>
+
+</body>
+</html>
